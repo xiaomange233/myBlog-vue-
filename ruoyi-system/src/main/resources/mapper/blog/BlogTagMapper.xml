@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.BlogTagMapper">
+
+    <resultMap type="BlogTag" id="BlogTagResult">
+        <id     property="tagId"         column="tag_id"         />
+        <result property="tagName"       column="tag_name"       />
+        <result property="description"   column="description"    />
+        <result property="status"        column="status"         />
+        <result property="createBy"      column="create_by"      />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="articleCount"  column="article_count"  />
+    </resultMap>
+
+    <sql id="selectTagVo">
+        select t.tag_id, t.tag_name, t.description, t.status, t.create_by, t.create_time,
+               t.update_time,
+               (select count(1) from blog_article_tag at where at.tag_id = t.tag_id) as article_count
+        from blog_tag t
+    </sql>
+
+    <select id="selectTagById" parameterType="Long" resultMap="BlogTagResult">
+        <include refid="selectTagVo"/>
+        where t.tag_id = #{tagId}
+    </select>
+
+    <select id="selectTagByName" parameterType="String" resultMap="BlogTagResult">
+        select tag_id, tag_name, description, status, create_by, create_time, update_time, 0 as article_count
+        from blog_tag
+        where tag_name = #{tagName}
+        limit 1
+    </select>
+
+    <select id="selectTagList" parameterType="BlogTag" resultMap="BlogTagResult">
+        <include refid="selectTagVo"/>
+        <where>
+            <if test="tagName != null and tagName != ''">
+                AND t.tag_name like concat('%', #{tagName}, '%')
+            </if>
+            <if test="status != null and status != ''">
+                AND t.status = #{status}
+            </if>
+        </where>
+        order by t.create_time desc
+    </select>
+
+    <insert id="insertTag" parameterType="BlogTag" useGeneratedKeys="true" keyProperty="tagId">
+        insert into blog_tag
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="tagName != null and tagName != ''">tag_name,</if>
+            <if test="description != null">description,</if>
+            <if test="status != null and status != ''">status,</if>
+            <if test="createBy != null and createBy != ''">create_by,</if>
+            create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="tagName != null and tagName != ''">#{tagName},</if>
+            <if test="description != null">#{description},</if>
+            <if test="status != null and status != ''">#{status},</if>
+            <if test="createBy != null and createBy != ''">#{createBy},</if>
+            sysdate()
+        </trim>
+    </insert>
+
+    <update id="updateTag" parameterType="BlogTag">
+        update blog_tag
+        <set>
+            <if test="tagName != null and tagName != ''">tag_name = #{tagName},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="status != null and status != ''">status = #{status},</if>
+            update_time = sysdate()
+        </set>
+        where tag_id = #{tagId}
+    </update>
+
+    <delete id="deleteTagById" parameterType="Long">
+        delete from blog_tag where tag_id = #{tagId}
+    </delete>
+
+    <delete id="deleteTagByIds" parameterType="Long">
+        delete from blog_tag where tag_id in
+        <foreach item="tagId" collection="array" open="(" separator="," close=")">
+            #{tagId}
+        </foreach>
+    </delete>
+</mapper>
