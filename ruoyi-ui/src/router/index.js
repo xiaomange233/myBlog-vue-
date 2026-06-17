@@ -62,8 +62,21 @@ export const constantRoutes = [
     hidden: true
   },
   {
+    path: '/portal',
+    component: () => import('@/views/portal/index'),
+    hidden: true,
+    meta: { title: '文章展示' }
+  },
+  {
+    path: '/portal/article/:articleId(\\d+)',
+    component: () => import('@/views/portal/detail'),
+    hidden: true,
+    meta: { title: '文章详情' }
+  },
+  {
     path: '',
     component: Layout,
+    hidden: true,
     redirect: 'index',
     children: [
       {
@@ -92,6 +105,20 @@ export const constantRoutes = [
 
 // 动态路由，基于用户权限动态去加载
 export const dynamicRoutes = [
+  {
+    path: '/front/article',
+    component: Layout,
+    hidden: true,
+    permissions: ['portal:article:list'],
+    children: [
+      {
+        path: ':articleId(\\d+)',
+        name: 'FrontArticleDetail',
+        component: () => import('@/views/portal/detail'),
+        meta: { title: '文章详情', activeMenu: '/front' }
+      }
+    ]
+  },
   {
     path: '/blog/article/edit',
     component: Layout,
