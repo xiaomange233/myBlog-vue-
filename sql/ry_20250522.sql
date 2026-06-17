@@ -1,5 +1,5 @@
 -- ----------------------------
--- 1、部门表 test pull
+-- 1、部门表
 -- ----------------------------
 drop table if exists sys_dept;
 create table sys_dept (
