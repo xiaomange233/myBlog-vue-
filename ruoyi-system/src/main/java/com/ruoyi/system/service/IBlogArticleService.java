@@ -12,6 +12,8 @@ public interface IBlogArticleService
 
     public List<BlogArticle> selectArticleList(BlogArticle article);
 
+    public BlogArticle selectPublishedArticleById(Long articleId);
+
     public int insertArticle(BlogArticle article);
 
     public int updateArticle(BlogArticle article);

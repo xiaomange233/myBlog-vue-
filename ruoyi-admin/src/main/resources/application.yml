@@ -12,6 +12,22 @@ ruoyi:
   addressEnabled: false
   # 验证码类型 math 数字计算 char 字符验证
   captchaType: math
+  # AI 管家配置（OpenAI-compatible）
+  ai:
+    # 未配置 API Key 前保持关闭
+    enabled: true
+    # 例如 OpenAI: https://api.openai.com/v1/chat/completions
+    # 也可以换成 DeepSeek、通义千问等兼容 OpenAI 协议的平台地址
+    base-url: https://api.deepseek.com
+    api-key: ${DEEPSEEK_API_KEY:}
+    chat:
+      options:
+        model: deepseek-v4-flash            # 推荐用最新模型
+        temperature: 0.7
+    max-tokens: 1200
+    timeout: 30000
+    system-prompt: 你是个人博客后台的平台管理员 AI 管家。回答要简洁、可执行，优先帮助管理员完成内容运营、文章选题、摘要润色、SEO 建议、后台功能使用和故障排查。
+
 
 # 开发环境配置
 server:

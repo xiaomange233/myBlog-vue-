@@ -42,6 +42,20 @@ public class BlogArticleServiceImpl implements IBlogArticleService
     }
 
     @Override
+    public BlogArticle selectPublishedArticleById(Long articleId)
+    {
+        BlogArticle article = articleMapper.selectPublishedArticleById(articleId);
+        if (article != null)
+        {
+            List<BlogTag> tags = articleMapper.selectTagsByArticleId(articleId);
+            article.setTagNames(tags.stream().map(BlogTag::getTagName).toArray(String[]::new));
+            articleMapper.updateViewCount(articleId, 1);
+            article.setViewCount(article.getViewCount() == null ? 1 : article.getViewCount() + 1);
+        }
+        return article;
+    }
+
+    @Override
     @Transactional
     public int insertArticle(BlogArticle article)
     {

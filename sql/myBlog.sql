@@ -158,3 +158,40 @@ WHERE NOT EXISTS (SELECT 1 FROM sys_menu WHERE perms = 'blog:tag:edit');
 INSERT INTO sys_menu(menu_name, parent_id, order_num, path, component, query, route_name, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, remark)
 SELECT '标签删除', @blog_tag_menu_id, 4, '#', '', '', '', 1, 0, 'F', '0', '0', 'blog:tag:remove', '#', 'admin', sysdate(), ''
 WHERE NOT EXISTS (SELECT 1 FROM sys_menu WHERE perms = 'blog:tag:remove');
+
+-- AI 管家菜单与权限
+INSERT INTO sys_menu(menu_name, parent_id, order_num, path, component, query, route_name, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, remark)
+SELECT 'AI 管家', 0, 6, 'ai', NULL, '', '', 1, 0, 'M', '0', '0', '', 'skill', 'admin', sysdate(), 'AI 管家目录'
+WHERE NOT EXISTS (SELECT 1 FROM sys_menu WHERE menu_name = 'AI 管家' AND parent_id = 0);
+
+SET @ai_menu_id := (SELECT menu_id FROM sys_menu WHERE menu_name = 'AI 管家' AND parent_id = 0 LIMIT 1);
+
+INSERT INTO sys_menu(menu_name, parent_id, order_num, path, component, query, route_name, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, remark)
+SELECT '平台管家', @ai_menu_id, 1, 'steward', 'ai/steward/index', '', 'AiSteward', 1, 0, 'C', '0', '0', 'ai:steward:chat', 'skill', 'admin', sysdate(), '平台管理员 AI 管家'
+WHERE NOT EXISTS (SELECT 1 FROM sys_menu WHERE perms = 'ai:steward:chat');
+
+UPDATE sys_menu SET visible = '0', icon = 'skill' WHERE menu_name = 'AI 管家' AND parent_id = 0;
+UPDATE sys_menu SET visible = '0', icon = 'skill' WHERE perms = 'ai:steward:chat';
+
+-- 游客/前台文章展示菜单
+INSERT INTO sys_menu(menu_name, parent_id, order_num, path, component, query, route_name, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, remark)
+SELECT '文章展示', 0, 1, 'front', 'portal/index', '', 'PortalIndex', 1, 0, 'C', '0', '0', 'portal:article:list', 'documentation', 'admin', sysdate(), '游客文章展示菜单'
+WHERE NOT EXISTS (SELECT 1 FROM sys_menu WHERE perms = 'portal:article:list');
+
+UPDATE sys_menu SET visible = '0', icon = 'documentation' WHERE perms = 'portal:article:list';
+
+-- 游客角色：只绑定文章展示菜单
+INSERT INTO sys_role(role_name, role_key, role_sort, data_scope, menu_check_strictly, dept_check_strictly, status, del_flag, create_by, create_time, remark)
+SELECT '游客', 'visitor', 3, '1', 1, 1, '0', '0', 'admin', sysdate(), '仅可访问文章展示'
+WHERE NOT EXISTS (SELECT 1 FROM sys_role WHERE role_key = 'visitor');
+
+SET @visitor_role_id := (SELECT role_id FROM sys_role WHERE role_key = 'visitor' LIMIT 1);
+SET @portal_menu_id := (SELECT menu_id FROM sys_menu WHERE perms = 'portal:article:list' LIMIT 1);
+
+INSERT INTO sys_role_menu(role_id, menu_id)
+SELECT @visitor_role_id, @portal_menu_id
+WHERE @visitor_role_id IS NOT NULL
+  AND @portal_menu_id IS NOT NULL
+  AND NOT EXISTS (
+      SELECT 1 FROM sys_role_menu WHERE role_id = @visitor_role_id AND menu_id = @portal_menu_id
+  );

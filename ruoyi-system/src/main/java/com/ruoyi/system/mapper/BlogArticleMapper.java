@@ -14,6 +14,8 @@ public interface BlogArticleMapper
 
     public List<BlogArticle> selectArticleList(BlogArticle article);
 
+    public BlogArticle selectPublishedArticleById(Long articleId);
+
     public int insertArticle(BlogArticle article);
 
     public int updateArticle(BlogArticle article);
@@ -23,6 +25,8 @@ public interface BlogArticleMapper
     public int deleteArticleByIds(Long[] articleIds);
 
     public int updateArticleStatus(@Param("articleId") Long articleId, @Param("status") String status);
+
+    public int updateViewCount(@Param("articleId") Long articleId, @Param("count") Integer count);
 
     public int insertArticleTag(@Param("articleId") Long articleId, @Param("tagId") Long tagId);
 

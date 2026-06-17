@@ -50,6 +50,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where a.article_id = #{articleId}
     </select>
 
+    <select id="selectPublishedArticleById" parameterType="Long" resultMap="BlogArticleResult">
+        select a.article_id, a.title, cast(a.content as char) as content, a.summary, a.cover_image,
+               a.status, a.is_top, a.is_comment, a.category_id, a.user_id, a.view_count,
+               a.like_count, a.comment_count, a.create_time, a.update_time,
+               c.category_name, u.user_name as author_name
+        from blog_article a
+        left join blog_category c on a.category_id = c.category_id
+        left join sys_user u on a.user_id = u.user_id
+        where a.article_id = #{articleId} and a.status = '1'
+    </select>
+
     <select id="selectArticleList" parameterType="BlogArticle" resultMap="BlogArticleResult">
         <include refid="selectArticleVo"/>
         <where>
@@ -123,6 +134,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <update id="updateArticleStatus">
         update blog_article set status = #{status}, update_time = sysdate() where article_id = #{articleId}
+    </update>
+
+    <update id="updateViewCount">
+        update blog_article set view_count = view_count + #{count} where article_id = #{articleId}
     </update>
 
     <insert id="insertArticleTag">
